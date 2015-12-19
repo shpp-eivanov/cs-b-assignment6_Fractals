@@ -1,7 +1,9 @@
 ﻿/********************************************************************************************
  * File: Sierpinski.cpp
  * ----------------------
- * v.1 2015/11/30
+ * v.2 2015/12/19 - changed
+ * - console position control added
+ *
  * Implementation of the Sierpinski triangle drawing.
  ********************************************************************************************/
 
@@ -18,7 +20,7 @@ using namespace std;
 GBufferedImage* img;                /* Main program image */
 double const MAX_LENGTH = 1000;     /* Max side length value for 0-oreder triangle */
 double const MIN_SIDE = 2;          /* Minimal inserted triangle side to make nice picture */
-double const MIN_WINDOW = 100;      /* Minimal size of main window */
+double const MIN_WINDOW = 150;      /* Minimal size of main window */
 
 /* -----------------------------------------------------------------------------------------//
  * Implementation section.
@@ -107,8 +109,10 @@ void setTriangleTopInWindow(GWindow& gw,
 
     if(gwHeight < MIN_WINDOW){
         gw.setSize(MIN_WINDOW, MIN_WINDOW);
+        setConsoleLocation(MIN_WINDOW, 0);
     }else{
         gw.setSize(gwWidth, gwHeight);
+        setConsoleLocation(gwWidth, 0);
     }
 
     vertex_X = gwWidth / 2;
@@ -219,7 +223,8 @@ void triangleProcess(GWindow& gw,
 
 int main() {
     GWindow gw;
-
+    gw.setLocation(0, 0);
+    setConsoleLocation(0, 0);
     double sideLength;      /* 0-order triangle side length */
     int inputOrder;         /* User order request */
     /* Asks user to enter length and order */
@@ -230,7 +235,6 @@ int main() {
     double vertex_Y;
     /* Adjusts window and set triangle top vertex position */
     setTriangleTopInWindow(gw, sideLength, vertex_X, vertex_Y);
-
     GPoint topPt(vertex_X, vertex_Y);/* Initiate top vertex */
     GPoint rightPt;                  /* Right vertex */
     GPoint leftPt;                   /* Left vertex */

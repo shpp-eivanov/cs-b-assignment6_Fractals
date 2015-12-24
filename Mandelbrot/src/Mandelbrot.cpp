@@ -1,9 +1,12 @@
 ﻿/********************************************************************************************
- * File: Mandelbrot.cpp
- * ----------------------
- * v.1 2015/11/30
- * Implementation of the Mandelbrot set drawing.
- ********************************************************************************************/
+* File: Mandelbrot.cpp
+* ----------------------
+* v.2 2015/12/24
+* - fields are renamed,
+* - code is reformatted
+*
+* Implementation of the Mandelbrot set drawing.
+********************************************************************************************/
 
 #include <iostream>
 #include "console.h"
@@ -19,8 +22,11 @@ GBufferedImage* img;
 double const RADIUS = 300;              /* Represents radius value "2" on the complex area  */
 int const MAX_DEPTH = 500;              /* Limit for iterations quantity  */
 
-double const GW_WIDTH =  1.3 * RADIUS;  /* Main image parameters, koeficients make          */
+double const GW_WIDTH = 1.3 * RADIUS;   /* Main image parameters, koeficients make          */
 double const GW_HEIGHT = 1.2 * RADIUS;  /* cardioide position being closer to window centre */
+
+int const COLORS_RANGE = 255;           /* Possible range of colors values */
+int const WHITE = 0xffffff;
 
 /*------------------------------------------------------------------------------------------//
  * Implementation section.
@@ -37,19 +43,19 @@ double const GW_HEIGHT = 1.2 * RADIUS;  /* cardioide position being closer to wi
  * of code to change sizes of program image.
  * -----------------------------------------------------------------------------------------*/
 
-/* Function: equationProcess
- * ---------------------------
+/* Function: calculateMandelbrotEquation
+ * --------------------------------------
  * Returns iterations quantity for current c-point(params a, b),
  * due to previous Z-value (params zR, zI).
  *
- * @a, b       Current complex area c-point: c = a + jb
- * @zR, zI     Previous complex Z-value parameters: Z = zR + jzI
- * @iter       Counter of iterations have been made yet  */
-int equationProcess(double a,
-                    double b,
-                    double zR,
-                    double zI,
-                    int iter){
+ * @param a, b       Current complex area c-point: c = a + jb
+ * @param zR, zI     Previous complex Z-value parameters: Z = zR + jzI
+ * @param iter       Counter of iterations have been made yet  */
+int calculateMandelbrotEquation(double a,
+                double b,
+                double zR,
+                double zI,
+                int iter) {
     /* Main Z-value rised to power:
      * zLenght = Z^2 = zR^2 + jzI^2 */
     double zLength;
@@ -75,10 +81,10 @@ int equationProcess(double a,
      * -------------------------------------------------------------------- */
 
     /* Main apreciation process */
-    if((zLength < 4) && (iter < MAX_DEPTH)){
-        return equationProcess(a, b, zR, zI, iter);//Continue calculations
+    if ((zLength < 4) && (iter < MAX_DEPTH)) {
+        return calculateMandelbrotEquation(a, b, zR, zI, iter);//Continue calculations
     }else{
-        return iter;                                //Stop calculations
+        return iter;                        //Stop calculations
     }
 }
 
@@ -93,9 +99,8 @@ int equationProcess(double a,
  * smaller value then MAX_DEPTH - determine that this is external point
  * and we can paint it in some other color.
  *
- * @col, row       Current image position  */
-int getIterationDepth(double col, double row){
-
+ * @param col, row       Current image position  */
+int getIterationDepth(double col, double row) {
     /* Implementation notes
      * --------------------------------------------------------------------
      * The user radius represents R = 2 radius on the
@@ -120,8 +125,8 @@ int getIterationDepth(double col, double row){
     /* Modifies image pixel position into
      * complex area position (c = a + jb) due
      * to implementation describtion above   */
-    double a = col *(2 / RADIUS) - 2;   /* a - real complex value */
-    double b = row *(2 / RADIUS) - 1;   /* b - imaginary complex value */
+    double a = col * (2 / RADIUS) - 2; /* a - real complex value */
+    double b = row * (2 / RADIUS) - 1; /* b - imaginary complex value */
 
     /* Implementation notes
      * --------------------------------------------------------------------
@@ -139,13 +144,13 @@ int getIterationDepth(double col, double row){
      * --------------------------------------------------------------------*/
 
     /* Apreciation starts from Z0 = z0R + jz0I = 0.             */
-    double z0R = 0;      /* Represents real value for complex Z0       */
-    double z0I = 0;      /* Represents imaginary value for complex Z0  */
-    int iter = 0;        /* Start value for iterations counter */
+    double z0R = 0;  /* Represents real value for complex Z0       */
+    double z0I = 0;  /* Represents imaginary value for complex Z0  */
+    int iter = 0;    /* Start value for iterations counter */
 
     /* Makes sequence of Z-value calculations for current c-point
      * to find out iterations quantity  */
-    int depth = equationProcess(a, b, z0R, z0I, iter);
+    int depth = calculateMandelbrotEquation(a, b, z0R, z0I, iter);
 
     return depth;
 }
@@ -153,25 +158,25 @@ int getIterationDepth(double col, double row){
 int main() {
     GWindow gw;
     gw.setSize(GW_WIDTH, GW_HEIGHT);
-    img = new GBufferedImage(GW_WIDTH, GW_HEIGHT,0xffffff);
+    img = new GBufferedImage(GW_WIDTH, GW_HEIGHT, WHITE);
     gw.add(img, 0, 0);
     /* For every image pixel:
      * - modifies it into complex area scale;
      * - appreciates, if it satisfy Mandelbrot set condition
      * - choses color of pixel due to Mandelbrot set condition */
-    for(int row = 0; row < GW_HEIGHT; row++){
-        for(int col = 0; col < GW_WIDTH; col++){
+    for (int row = 0; row < GW_HEIGHT; row++) {
+        for (int col = 0; col < GW_WIDTH; col++) {
             /* Determines main Mandelbrot condition (described above)
              * for this pixel */
             int currentDepth = getIterationDepth(col, row);
             /* Set color for pixel:
              * - if currentDepth = MAX_DEPTH - it's black pixel
              * - if currentDepth < MAX_DEPTH - set apropriate color */
-            int color = 255 *(MAX_DEPTH - currentDepth)/MAX_DEPTH;
+            int color = COLORS_RANGE * (MAX_DEPTH - currentDepth) / MAX_DEPTH;
             int pixelColor = color * color * color;
             img->setRGB(col, row, pixelColor);
         }
     }
-   return 0;
+    return 0;
 }
 
